@@ -43,6 +43,30 @@ router.get('/post/:id', async (req, res) => {
     }
 })
 
+
+//get all posts
+
+// '/posts?sortBy=votes:desc
+router.get('/posts', async (req, res) => {
+    const sort = {}
+
+if(req.query.sortBy){
+    const parts = req.query.sortBy.split(':')
+    sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+}
+
+    try {
+        const posts = await Post.find({}).populate({
+            path: '_creator',
+            select: 'username',
+        }).sort(sort)
+
+        res.send(posts)
+    }catch(e){
+        res.status(500).send(e.message)
+    }
+})
+
 //Get all posts from a specific user
 router.get('/posts/:username', async (req, res) => {
     const {username} = req.params

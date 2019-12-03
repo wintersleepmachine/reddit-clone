@@ -32,7 +32,6 @@ const commentObj = comment.toObject()
 
 delete commentObj.isDeleted
 
-
 return commentObj
 }
 

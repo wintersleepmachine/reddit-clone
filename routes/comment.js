@@ -29,7 +29,7 @@ router.post('/comments', auth, async(req, res) => {
     }
 })
 
-//Get a comment
+// //Get a comment
 router.get('/comments/:id', async (req, res) => {
     const {id} = req.params
     try {
@@ -43,6 +43,32 @@ router.get('/comments/:id', async (req, res) => {
         }
 
         res.send(comment)
+    }catch(e){
+        res.status(500).send(e.message)
+    }
+})
+
+
+//Get all comments from a specific post
+///comments/post/:postId?sortBy=votes:desc
+router.get('/comments/post/:postId',  async (req, res) => {
+    const {postId} = req.params
+    const sort = {}
+
+    if(req.query.sortBy){
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    }
+
+    try {
+        const post = await Post.findById(postId)
+        const comments = await Post.find({_comments: {$in: post._comments}}).populate({
+            path: '_comments'
+        })
+
+        const sortedComments = comments[0]._comments.sort((a,b) => b.votes - a.votes)
+
+        res.send(sortedComments)
     }catch(e){
         res.status(500).send(e.message)
     }
@@ -65,8 +91,6 @@ router.get('/comments/u/:username', async (req, res) => {
     }catch(e){
         res.status(500).send(e.message)
     }
-
- 
 })
 
 
